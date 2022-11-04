@@ -145,6 +145,7 @@ func main() {
 	googlered := 0
 	strokqty := 0
 	strokred := 0
+	newrowsupload := 0
 
 	for fl, filename := range jsons {
 		valuetocheck := false
@@ -224,6 +225,7 @@ func main() {
 						panic(err)
 					}
 				}
+				newrowsupload += len(exitlist)
 				exitlist = exitlist[:0] // keep capacity. alternative is slice = nil
 				fmt.Println("Sent to DB on row #", i, " continue...")
 			}
@@ -257,6 +259,7 @@ func main() {
 					panic(err)
 				}
 			}
+			newrowsupload += len(exitlist)
 			exitlist = exitlist[:0] // keep capacity. alternative is slice = nil
 
 		}
@@ -265,19 +268,19 @@ func main() {
 		fmt.Println(fl, "/", len(jsons), " files done and uploaded to DB ", time.Since(start))
 	}
 	durREADandDOUBLES := time.Since(start)
-	fmt.Printf("Files have correct new data %d/%d.\nCorrect new rows %d/%d.\n", googlered, googleqty, strokred, strokqty)
 	if googlered != googleqty || strokred != strokqty {
+		fmt.Println("ERRORS exists!")
 		for _, s := range er.Err {
 			fmt.Println(s)
 		}
 	}
 	if len(er.Doubles) != 0 {
-		fmt.Println("Doubles ", len(er.Doubles), " rows : ")
+		fmt.Println("\nDoubles: ")
 		for _, s := range er.Doubles {
 			fmt.Println(s)
 		}
 	}
-	fmt.Println("Old rows qty = ", er.Old)
-	durSTDOUT := time.Since(start)
-	fmt.Println("datebase red in ", durDB, ". Files red and Check for doubles in ", durREADandDOUBLES, "STDOUT in", durSTDOUT)
+	fmt.Printf("Files have correct new data %d/%d.\nUploaded %d rows from %d can read from total %d rows in files.\nOld rows qty = %d",
+		googlered, googleqty, newrowsupload, strokred, strokqty, er.Old)
+	fmt.Println("datebase red in ", durDB, ". Files red and Check for doubles in ", durREADandDOUBLES)
 }
